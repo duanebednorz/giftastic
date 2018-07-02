@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Duane's Favorite Topics</title>
+    <style type="text/css">
+        button,
+        div,
+        form,
+        input {
+            margin: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+</head>
+
+<body>
+        <div class="jumbotron">
+                <h1 class="display-4" "text-center">Hello, world!</h1>
+                <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+                <hr class="my-4">
+                <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+                <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+              </div>
+    <div class="container">
+        <h1>Topic Search</h1>
+        <!-- Topics here -->
+        <div id="topics-view"></div>
+        <form id="topic-form">
+            <label for="topic-input">Enter Topics Here:</label>
+            <input type="text" id="topic-input">
+            <br>
+            <!-- Button triggers new topics to be added -->
+            <input id="add-topic" type="submit" value="Add Topic Yo">
+        </form>
+        <div id="gifs-appear-here"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+            var topics = ["Cat", "Dog", "Elephant", "Giraffe"];
+
+            function renderButtons() {
+                $("#topics-view").empty();
+                for (var i = 0; i < topics.length; i++) {
+                    var a = $("<button>");
+                    a.addClass("gif");
+                    a.attr("data-topic", topics[i]);
+                    a.text(topics[i]);
+
+                    $("#topics-view").append(a);
+                }
+            }
+            $("#add-topic").on("click", function (event) {
+                event.preventDefault();
+                var newTopic = $("#topic-input").val().trim();
+                topics.push(newTopic);
+                renderButtons();
+            });
+
+            renderButtons();
+            // Attaching gifs to dynamically created buttons
+
+            $("#topics-view").on("click", "button", function () {
+                var topic = $(this).attr("data-topic");
+                var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                    topic + "&api_key=X0nqKNd4NZpjR264gXgrNfgiFJFzdW4D";
+                $.ajax({
+                    url: queryURL,
+                    method: "GET"
+                })
+                    .then(function (response) {
+                        console.log(queryURL);
+                        console.log(response);
+                        var results = response.data;
+                        for (var i = 0; i < results.length; i++) {
+                            var topicDiv = $("<div>");
+                            var p = $("<p>").text("Rating: " + results[i].rating);
+                            var topicImage = $("<img>");
+                            topicImage.attr("src", results[i].images.fixed_height_still.url);
+                            topicImage.attr("data-still", response.data[i].images.fixed_height_still.url);
+                            topicImage.attr("data-animate", response.data[i].images.fixed_height.url);
+                            topicImage.attr("data-state", "still");
+                            topicDiv.prepend(p);
+                            topicDiv.prepend(topicImage);
+                            $("#gifs-appear-here").prepend(topicDiv);
+                        }
+                        $("img").on("click", function () {
+
+                            var state = $(this).attr("data-state");
+
+                            if (state === "still") {
+                                $(this).attr("src", $(this).attr("data-animate"));
+                                $(this).attr("data-state", "animate");
+                            } else {
+                                $(this).attr("src", $(this).attr("data-still"));
+                                $(this).attr("data-state", "still");
+                            }
+                        });
+                    });
+            });
+
+
+
+        </script>
+    </div>
+</body>
+
+</html>
